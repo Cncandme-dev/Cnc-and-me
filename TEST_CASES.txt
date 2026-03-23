@@ -1,0 +1,67 @@
+CNC & Me quick verification cases
+
+These are checked against the same equations used in the app:
+RPM = (1000 × Vc) / (pi × D)
+Feed = RPM × z × fz
+Endmill actual hmax = programmed fz × radial chip thinning factor
+HFM actual hmax = programmed fz × sin(lead angle)
+MRR = ae × ap × feed / 1000
+Power = MRR × unit power
+
+1) Endmill | 316 Stainless | Adaptive
+Inputs:
+D 16 mm
+z 4
+Vc 120 m/min
+fz 0.10 mm/tooth
+ae 2 mm
+ap 12 mm
+Expected:
+RPM 2387
+Feed 955 mm/min
+Actual hmax 0.066 mm
+Chip thinning factor 0.661
+MRR 22.9 cm^3/min
+Power 1.03 kW
+
+2) Endmill | 316 Stainless | Slotting
+Inputs:
+D 16 mm
+z 4
+Vc 75 m/min
+fz 0.035 mm/tooth
+ae 16 mm
+ap 8 mm
+Expected:
+RPM 1492
+Feed 209 mm/min
+Actual hmax 0.035 mm
+Chip thinning factor 1.000
+MRR 26.7 cm^3/min
+Power 1.20 kW
+
+3) HFM | 316 Stainless | True high feed
+Inputs:
+D 32 mm
+z 4
+Vc 150 m/min
+fz 0.9 mm/tooth
+ae 20 mm
+ap 0.8 mm
+Lead 15 deg
+Expected:
+RPM 1492
+Feed 5371 mm/min
+Actual hmax 0.233 mm
+Lead factor 0.259
+MRR 85.9 cm^3/min
+Power 3.87 kW
+
+4) HFM | 316 Stainless | True high feed | target corrected
+Inputs:
+Same as case 3 but use target hmax = 0.25 mm and tick target correction
+Expected:
+Corrected feed 5765 mm/min
+Corrected hmax 0.250 mm
+MRR 92.2 cm^3/min
+Power 4.15 kW

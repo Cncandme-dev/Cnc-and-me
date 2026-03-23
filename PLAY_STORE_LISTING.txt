@@ -1,0 +1,19 @@
+App name: CNC & Me
+Subtitle: Machining Calculator & Chip Load Tool
+Short description:
+Dial in chip load, feeds, and cutting strategy with a visual hmax map.
+
+Full description:
+CNC & Me is a machining calculator built for real-world cutting decisions.
+
+Instead of just numbers, it shows you where your cut sits relative to the correct chip thickness range and how to fix it.
+
+Features:
+- Chip load and feed calculator
+- Visual hmax position map
+- Standard endmill and high feed modes
+- Dynamic feed tuning with live preview
+- Clear guidance on what to adjust and why
+- Fully offline, no login required
+
+Designed for machinists who want fast, reliable answers on the shop floor.

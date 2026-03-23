@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>CNC & Me</title>
+  <meta name="description" content="CNC & Me is a machining calculator and chip load tool built to help machinists make faster feed, chip thinning, and hmax decisions for standard endmills and high feed mills." />
+  <meta name="theme-color" content="#0b1120" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CNC &amp; Me" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header card">
+      <div class="brand-lockup">
+        <img class="brand-logo" src="assets/icon-192.png" alt="CNC &amp; Me logo" />
+        <div>
+          <div class="eyebrow">Machining calculator <span class="version-pill">v1.0.0</span></div>
+          <h1>CNC &amp; Me</h1>
+          <p class="sub">Machining Calculator &amp; Chip Load Tool</p>
+          <p class="sub sub-detail">Built for machinists who want fast, defensible feed decisions on the floor. Standard endmill and high feed modes, visual hmax maps, and clear guidance that works fully offline.</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="mode-grid">
+      <button class="mode-card active" data-tab="endmill">
+        <img src="assets/endmill.png" alt="Endmill engagement diagram" />
+        <div>
+          <strong>Standard endmill</strong>
+          <span>Adaptive, profiling, finishing, slot checks</span>
+        </div>
+      </button>
+      <button class="mode-card" data-tab="hfm">
+        <img src="assets/hfm.png" alt="High feed milling diagram" />
+        <div>
+          <strong>High feed mill</strong>
+          <span>Low lead angle cutters and HFM feed decisions</span>
+        </div>
+      </button>
+    </section>
+
+    <main>
+      <section id="endmill" class="tab active">
+        <div class="layout">
+          <section class="card inputs">
+            <h2>Inputs</h2>
+            <div class="grid two">
+              <label>
+                Material
+                <select id="em-material"></select>
+              </label>
+              <label>
+                Strategy
+                <select id="em-strategy">
+                  <option value="adaptive">Adaptive</option>
+                  <option value="profile">Profile</option>
+                  <option value="finish">Finish</option>
+                  <option value="slot">Slotting</option>
+                </select>
+              </label>
+            </div>
+            <div class="grid two">
+              <label>Tool diameter D (mm)<input id="em-d" type="number" inputmode="decimal" step="any" value="16"></label>
+              <label>Teeth z<input id="em-z" type="number" inputmode="numeric" step="1" value="4"></label>
+              <label>Cutting speed Vc (m/min)<input id="em-vc" type="number" inputmode="decimal" step="any" value="120"></label>
+              <label>Programmed fz (mm/tooth)<input id="em-fz" type="number" inputmode="decimal" step="0.001" value="0.08"></label>
+              <label>Radial engagement ae (mm)<input id="em-ae" type="number" inputmode="decimal" step="any" value="1"></label>
+              <label>Axial depth ap (mm)<input id="em-ap" type="number" inputmode="decimal" step="any" value="12"></label>
+            </div>
+            <div class="grid two">
+              <label>Machine max rpm<input id="em-maxrpm" type="number" inputmode="numeric" step="any" placeholder="optional"></label>
+              <label>Machine power (kW)<input id="em-maxkw" type="number" inputmode="decimal" step="any" placeholder="optional"></label>
+            </div>
+            <div class="grid two">
+              <label>Target hmax (mm)<input id="em-target" type="number" inputmode="decimal" step="any" value="0.08"></label>
+              <label class="check"><input id="em-use-target" type="checkbox"> Use target hmax to correct feed</label>
+            </div>
+            <div class="actions">
+              <button id="em-preset" class="secondary">Apply material start</button>
+              <button id="em-calc" class="primary">Calculate</button>
+            </div>
+          </section>
+
+          <section class="card outputs">
+            <h2>Outputs</h2>
+            <div class="mobile-toggle-row" data-scope="em">
+              <button type="button" class="mobile-toggle-btn active" data-toggle-section="chart" data-scope="em">Map</button>
+              <button type="button" class="mobile-toggle-btn" data-toggle-section="decision" data-scope="em">Decision</button>
+              <button type="button" class="mobile-toggle-btn" data-toggle-section="notes" data-scope="em">Notes</button>
+            </div>
+            <div class="summary" id="em-summary"></div>
+            <div class="top-callout neutral" id="em-topcallout"></div>
+            <div class="chart-card feature-card mobile-active" data-mobile-section="em" data-section-name="chart">
+              <div class="chart-head">
+                <div>
+                  <div class="feature-kicker">Main decision view</div>
+                  <h3>Chip Thickness Position Map</h3>
+                  <p>Read chip thickness first, then tune cutting speed once the cut is in the band.</p>
+                </div>
+                <div class="chart-stats" id="em-chart-stats"></div>
+              </div>
+              <div id="em-chart"></div>
+              <div class="chart-controls" id="em-chart-controls"></div>
+              <p class="chart-caption" id="em-chart-caption">Calculate to see where your programmed fz lands against the target hmax band.</p>
+            </div>
+            <section class="decision-block" data-mobile-section="em" data-section-name="decision">
+              <div class="decision-block-head">
+                <div>
+                  <div class="feature-kicker">Front and centre</div>
+                  <h3>Cut decision</h3>
+                  <p>The map shows where you are. This table spells out what that means as a machinist and what to move first.</p>
+                </div>
+              </div>
+              <div class="decision-table" id="em-metrics"></div>
+            </section>
+            <div class="status neutral" id="em-status">
+              <strong>Ready</strong>
+              <p>Load a material start point or enter your own values, then calculate.</p>
+            </div>
+            <div class="notes compact-card" data-mobile-section="em" data-section-name="notes">
+              <div class="note-card">
+                <h3>Target hmax range</h3>
+                <p id="em-range">Recommended target range appears here.</p>
+              </div>
+              <div class="note-card">
+                <h3>Preset note</h3>
+                <p id="em-preset-note">Material and strategy note appears here.</p>
+              </div>
+              <div class="note-card">
+                <h3>What it means</h3>
+                <p id="em-meaning">Main interpretation appears here.</p>
+              </div>
+              <div class="note-card">
+                <h3>What to do next</h3>
+                <p id="em-next">Practical next steps appear here.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="hfm" class="tab">
+        <div class="layout">
+          <section class="card inputs">
+            <h2>Inputs</h2>
+            <div class="grid two">
+              <label>
+                Material
+                <select id="hf-material"></select>
+              </label>
+              <label>
+                Cut style
+                <select id="hf-style">
+                  <option value="true-hfm">True high feed</option>
+                  <option value="light-face">Light face milling</option>
+                  <option value="long-reach">Long reach</option>
+                </select>
+              </label>
+            </div>
+            <div class="grid two">
+              <label>Tool diameter D (mm)<input id="hf-d" type="number" inputmode="decimal" step="any" value="32"></label>
+              <label>Teeth z<input id="hf-z" type="number" inputmode="numeric" step="1" value="4"></label>
+              <label>Cutting speed Vc (m/min)<input id="hf-vc" type="number" inputmode="decimal" step="any" value="180"></label>
+              <label>Programmed fz (mm/tooth)<input id="hf-fz" type="number" inputmode="decimal" step="0.1" value="1.2"></label>
+              <label>Width of cut ae (mm)<input id="hf-ae" type="number" inputmode="decimal" step="any" value="20"></label>
+              <label>Depth of cut ap (mm)<input id="hf-ap" type="number" inputmode="decimal" step="any" value="0.8"></label>
+              <label>Lead angle (deg)<input id="hf-lead" type="number" inputmode="decimal" step="any" value="15"></label>
+              <label>Corner radius (mm)<input id="hf-radius" type="number" inputmode="decimal" step="any" value="1.6"></label>
+            </div>
+            <div class="grid two">
+              <label>Machine max rpm<input id="hf-maxrpm" type="number" inputmode="numeric" step="any" placeholder="optional"></label>
+              <label>Machine power (kW)<input id="hf-maxkw" type="number" inputmode="decimal" step="any" placeholder="optional"></label>
+            </div>
+            <div class="grid two">
+              <label>Target hmax (mm)<input id="hf-target" type="number" inputmode="decimal" step="any" value="0.31"></label>
+              <label class="check"><input id="hf-use-target" type="checkbox"> Use target hmax to correct feed</label>
+            </div>
+            <div class="actions">
+              <button id="hf-preset" class="secondary">Apply material start</button>
+              <button id="hf-calc" class="primary">Calculate</button>
+            </div>
+          </section>
+
+          <section class="card outputs">
+            <h2>Outputs</h2>
+            <div class="mobile-toggle-row" data-scope="hf">
+              <button type="button" class="mobile-toggle-btn active" data-toggle-section="chart" data-scope="hf">Map</button>
+              <button type="button" class="mobile-toggle-btn" data-toggle-section="decision" data-scope="hf">Decision</button>
+              <button type="button" class="mobile-toggle-btn" data-toggle-section="notes" data-scope="hf">Notes</button>
+            </div>
+            <div class="summary" id="hf-summary"></div>
+            <div class="top-callout neutral" id="hf-topcallout"></div>
+            <div class="chart-card feature-card mobile-active" data-mobile-section="hf" data-section-name="chart">
+              <div class="chart-head">
+                <div>
+                  <div class="feature-kicker">Main decision view</div>
+                  <h3>Chip Thickness Position Map</h3>
+                  <p>Lead angle is what really changes chip thinning here, so the map centres the feed decision around that.</p>
+                </div>
+                <div class="chart-stats" id="hf-chart-stats"></div>
+              </div>
+              <div id="hf-chart"></div>
+              <div class="chart-controls" id="hf-chart-controls"></div>
+              <p class="chart-caption" id="hf-chart-caption">Calculate to see where your programmed fz lands against the target hmax band.</p>
+            </div>
+            <section class="decision-block" data-mobile-section="hf" data-section-name="decision">
+              <div class="decision-block-head">
+                <div>
+                  <div class="feature-kicker">Front and centre</div>
+                  <h3>Cut decision</h3>
+                  <p>The map shows where you are. This table spells out what that means as a machinist and what to move first.</p>
+                </div>
+              </div>
+              <div class="decision-table" id="hf-metrics"></div>
+            </section>
+            <div class="status neutral" id="hf-status">
+              <strong>Ready</strong>
+              <p>Use this for low lead angle cutters where chip thinning mainly comes from lead angle.</p>
+            </div>
+            <div class="notes compact-card" data-mobile-section="hf" data-section-name="notes">
+              <div class="note-card">
+                <h3>Target hmax range</h3>
+                <p id="hf-range">Recommended target range appears here.</p>
+              </div>
+              <div class="note-card">
+                <h3>Preset note</h3>
+                <p id="hf-preset-note">Material and style note appears here.</p>
+              </div>
+              <div class="note-card">
+                <h3>What it means</h3>
+                <p id="hf-meaning">Main interpretation appears here.</p>
+              </div>
+              <div class="note-card">
+                <h3>What to do next</h3>
+                <p id="hf-next">Practical next steps appear here.</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <footer class="footer card">
+      <div>
+        <strong>About CNC &amp; Me</strong>
+        <p>Built for machinists. Designed to visualise chip thickness, feed decisions, and what to move first. Works fully offline with local-only calculations.</p>
+      </div>
+      <div class="footer-links">
+        <span class="footer-tag">@cncandme</span>
+        <a href="privacy.html">Privacy policy</a>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>

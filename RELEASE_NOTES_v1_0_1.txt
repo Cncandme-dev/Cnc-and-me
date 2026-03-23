@@ -1,0 +1,14 @@
+CNC & Me v1.0.1 prep build
+
+Changes made in this package:
+- Added machinist-friendly input guardrails and numeric limits
+- Added sticky mobile action bar so Calculate stays reachable
+- Added mobile output toggles for Map, Decision, and Notes to reduce scroll fatigue
+- Refactored repeated rpm/feed logic into a shared helper
+- Packaged images into an /assets folder to match app paths
+
+Still required before Play Store:
+- Host privacy.html at a public HTTPS URL
+- Wrap into Android app and generate signed AAB
+- Capture real device screenshots
+- Final on-device testing
